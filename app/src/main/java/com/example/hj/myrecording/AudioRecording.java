@@ -169,7 +169,7 @@ public class AudioRecording extends Activity {
             Log.d(LOG_Audio, "Recorder && Player Release!");
 
 
-            /*------send a stop message to server-----*/
+            /*------send a stop message to server----
             InetAddress destination = null;
             try {
                 destination = InetAddress.getByName(IP);
@@ -187,7 +187,7 @@ public class AudioRecording extends Activity {
             }
             Log.d(LOG_NW, "send stop message to server!");
             socket.close();
-            Log.d(LOG_NW, "socket close!");
+            Log.d(LOG_NW, "socket close!");-*/
 
 
             recorder = null;
