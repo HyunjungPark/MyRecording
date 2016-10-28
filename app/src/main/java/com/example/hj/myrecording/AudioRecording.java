@@ -41,7 +41,7 @@ public class AudioRecording extends Activity {
     /*------ about socket communication ------*/
     public DatagramSocket socket;
     private int port = 7979;
-    String IP = "192.168.43.144";
+    String IP = "192.168.0.4";
 
 
     String LOG_Audio = "Recording";
@@ -74,7 +74,6 @@ public class AudioRecording extends Activity {
 
 
     private void startStreaming() {
-
         recordingThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -129,6 +128,7 @@ public class AudioRecording extends Activity {
                     player.play();
                     Log.d(LOG_Audio, "Start Playing!");
 
+                    int count =0;
 
                     while (isRecording == true) {
                         //reading data from MIC into buffer
@@ -140,10 +140,22 @@ public class AudioRecording extends Activity {
                         packet = new DatagramPacket(audioBuffer, audioBuffer.length, destination, port);
 
                         socket.send(packet);
+                        count++;
                         Log.d(LOG_NW, "packet sending to  " + destination + " with port : " + port);
 
-                    }
 
+                    }
+                    Log.d(LOG_NW, "total # of packet  " + count);
+
+                    if(isRecording == false) {
+                        byte[] stopBuffer = ("stop").getBytes();
+                        DatagramPacket stop_packet = new DatagramPacket(stopBuffer, stopBuffer.length, destination, port);
+
+                        socket.send(stop_packet);
+                        Log.d(LOG_NW, "send stop message to server!");
+                        socket.close();
+                        Log.d(LOG_NW, "socket close!");
+                    }
 
                 } catch (UnknownHostException e) {
                     Log.d(LOG_Audio, "UnknownHostException");
@@ -157,7 +169,7 @@ public class AudioRecording extends Activity {
     }
 
 
-    private void stopRecording(){
+    private void stopRecording() throws UnknownHostException {
         // stops the recording activity
         if (null != recorder) {
             isRecording = false;
@@ -167,28 +179,6 @@ public class AudioRecording extends Activity {
             recorder.release();
             player.release();
             Log.d(LOG_Audio, "Recorder && Player Release!");
-
-
-            /*------send a stop message to server----
-            InetAddress destination = null;
-            try {
-                destination = InetAddress.getByName(IP);
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            }
-
-            byte[] stopBuffer = ("stop").getBytes();
-            DatagramPacket stop_packet = new DatagramPacket(stopBuffer, stopBuffer.length, destination, port);
-
-            try {
-                socket.send(stop_packet);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            Log.d(LOG_NW, "send stop message to server!");
-            socket.close();
-            Log.d(LOG_NW, "socket close!");-*/
-
 
             recorder = null;
             player = null;
@@ -207,7 +197,11 @@ public class AudioRecording extends Activity {
                 }
                 case R.id.stop_btn: {
                     enableButtons(false);
-                    stopRecording();
+                    try {
+                        stopRecording();
+                    } catch (UnknownHostException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 }
 
